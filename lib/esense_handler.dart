@@ -3,55 +3,43 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 class EsenseHandler {
-  bool connected = false;
-  String _deviceName = 'Unknown';
+  EsenseHandler({required this.esenseName, this.onEvent, this.onConnectedChange});
+
+  Function(String)? onEvent;
+  Function(bool)? onConnectedChange;
+
+  String esenseName = '';
+  bool _connected = false;
+
   double _voltage = -1;
-  String _deviceStatus = '';
-  String _button = 'not pressed';
+  bool _button_pressed = false;
+
   bool _sampling = false;
   String _event = '';
-  String eSenseName = 'eSense-0099';
-
-  EsenseHandler({required this.onEvent});
-
-  Function(String) onEvent;
 
   StreamSubscription? subscription;
 
   Future connectToESense() async {
-    developer.log('connecting... connected: $connected');
-    if (!connected) connected = await ESenseManager().connect(eSenseName);
-
-    _deviceStatus = connected ? 'connecting' : 'connection failed';
+    developer.log('connecting... connected: $_connected');
+    if (!_connected) {
+      _connected = await ESenseManager().connect(esenseName);
+    }
+    onConnectedChange!(_connected);
   }
 
-  Future listenToESense() async {
+  Future startListenToESense() async {
     // if you want to get the connection events when connecting,
     // set up the listener BEFORE connecting...
     ESenseManager().connectionEvents.listen((event) {
       developer.log('CONNECTION event: $event');
 
       // when we're connected to the eSense device, we can start listening to events from it
-      if (event.type == ConnectionType.connected) _listenToESenseEvents();
-
-      connected = false;
-      switch (event.type) {
-        case ConnectionType.connected:
-          _deviceStatus = 'connected';
-          connected = true;
-          break;
-        case ConnectionType.unknown:
-          _deviceStatus = 'unknown';
-          break;
-        case ConnectionType.disconnected:
-          _deviceStatus = 'disconnected';
-          break;
-        case ConnectionType.device_found:
-          _deviceStatus = 'device_found';
-          break;
-        case ConnectionType.device_not_found:
-          _deviceStatus = 'device_not_found';
-          break;
+      if (event.type == ConnectionType.connected) {
+        _listenToESenseEvents();
+        _connected = true;
+        onConnectedChange!(_connected);
+      } else {
+        _connected = false;
       }
     });
   }
@@ -61,7 +49,7 @@ class EsenseHandler {
     Timer.periodic(
       const Duration(seconds: 10),
       (timer) async =>
-          (connected) ? await ESenseManager().getBatteryVoltage() : null,
+          (_connected) ? await ESenseManager().getBatteryVoltage() : null,
     );
 
     // wait 2, 3, 4, 5, ... secs before getting the name, offset, etc.
@@ -83,16 +71,18 @@ class EsenseHandler {
     ESenseManager().eSenseEvents.listen((event) {
       developer.log('ESENSE event: $event');
 
+      onEvent!(event.toString());
+
       switch (event.runtimeType) {
-        case DeviceNameRead:
-          _deviceName = (event as DeviceNameRead).deviceName ?? 'Unknown';
-          break;
+        // case DeviceNameRead:
+        //   _deviceName = (event as DeviceNameRead).deviceName ?? 'Unknown';
+        //   break;
         case BatteryRead:
           _voltage = (event as BatteryRead).voltage ?? -1;
           break;
         case ButtonEventChanged:
-          _button =
-              (event as ButtonEventChanged).pressed ? 'pressed' : 'not pressed';
+          _button_pressed = (event as ButtonEventChanged).pressed;
+
           break;
         case AccelerometerOffsetRead:
           // TODO
@@ -109,14 +99,14 @@ class EsenseHandler {
     _getESenseProperties();
   }
 
-  void _startListenToSensorEvents() async {
-    // subscribe to sensor event from the eSense device
-    subscription = ESenseManager().sensorEvents.listen((event) {
-      developer.log('SENSOR event: $event');
-      _event = event.toString();
-    });
-    _sampling = true;
-  }
+  // void _startListenToSensorEvents() async {
+  //   // subscribe to sensor event from the eSense device
+  //   subscription = ESenseManager().sensorEvents.listen((event) {
+  //     developer.log('SENSOR event: $event');
+  //     _event = event.toString();
+  //   });
+  //   _sampling = true;
+  // }
 
   void pauseListenToSensorEvents() async {
     subscription?.cancel();

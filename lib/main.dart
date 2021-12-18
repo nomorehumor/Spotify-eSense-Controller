@@ -11,15 +11,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late EsenseHandler handler = EsenseHandler(onEvent: onEvent);
+  late EsenseHandler handler =
+      EsenseHandler(esenseName: 'eSense-0099', 
+                    onEvent: onEvent, 
+                    onConnectedChange: onConnectedChange);
 
   String _event = "";
-  bool connected = false;
+  bool _connected = false;
 
   @override
   void initState() {
     super.initState();
-    handler.listenToESense();
+    handler.startListenToESense();
   }
 
   @override
@@ -31,6 +34,12 @@ class _MyAppState extends State<MyApp> {
   void onEvent(String event) {
     setState(() {
       _event = event;
+    });
+  }
+
+  void onConnectedChange(bool connected) {
+    setState(() {
+      _connected = connected;
     });
   }
 
@@ -51,6 +60,7 @@ class _MyAppState extends State<MyApp> {
             // Text('eSense Button Event: \t$_button'),
             // Text(''),
             Text(_event),
+            Text("Connected: $_connected"),
             Container(
               height: 80,
               width: 200,
