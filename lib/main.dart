@@ -1,7 +1,11 @@
+import 'package:esense_application/compass.dart';
+import 'package:esense_application/headset/gesture_classifier.dart';
+import 'package:esense_flutter/esense.dart';
 import 'package:flutter/material.dart';
-import 'esense_handler.dart';
+import 'headset/esense_handler.dart';
+import 'compass.dart';
 
-void main() => runApp(const MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -11,12 +15,12 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late EsenseHandler handler =
-      EsenseHandler(esenseName: 'eSense-0099', 
-                    onEvent: onEvent, 
-                    onConnectedChange: onConnectedChange);
+  late EsenseHandler handler = EsenseHandler(
+      esenseName: 'eSense-0099',
+      onEvent: onEvent,
+      onConnectedChange: onConnectedChange);
+  late EsenseGestureClassifier gestureClassifier = EsenseGestureClassifier();
 
-  String _event = "";
   bool _connected = false;
 
   @override
@@ -31,16 +35,14 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  void onEvent(String event) {
-    setState(() {
-      _event = event;
-    });
-  }
-
   void onConnectedChange(bool connected) {
     setState(() {
       _connected = connected;
     });
+  }
+
+  void onEvent(SensorEvent event) {
+    gestureClassifier.handleEvent(event);
   }
 
   @override
@@ -52,31 +54,28 @@ class _MyAppState extends State<MyApp> {
       ),
       body: Align(
         alignment: Alignment.topLeft,
-        child: ListView(
-          children: [
-            // Text('eSense Device Status: \t$_deviceStatus'),
-            // Text('eSense Device Name: \t$_deviceName'),
-            // Text('eSense Battery Level: \t$_voltage'),
-            // Text('eSense Button Event: \t$_button'),
-            // Text(''),
-            Text(_event),
-            Text("Connected: $_connected"),
-            Container(
-              height: 80,
-              width: 200,
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(10)),
-              child: TextButton.icon(
-                onPressed: handler.connectToESense,
-                icon: const Icon(Icons.login),
-                label: const Text(
-                  'CONNECT....',
-                  style: TextStyle(fontSize: 35),
-                ),
+        child: ListView(children: [
+          // Text('eSense Device Status: \t$_deviceStatus'),
+          // Text('eSense Device Name: \t$_deviceName'),
+          // Text('eSense Battery Level: \t$_voltage'),
+          // Text('eSense Button Event: \t$_button'),
+          // Text(''),
+          Text(_event),
+          Text("Connected: $_connected"),
+          Container(
+            height: 80,
+            width: 200,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            child: TextButton.icon(
+              onPressed: handler.connectToESense,
+              icon: const Icon(Icons.login),
+              label: const Text(
+                'CONNECT....',
+                style: TextStyle(fontSize: 35),
               ),
             ),
-          ],
-        ),
+          )
+        ]),
       ),
     ));
   }
