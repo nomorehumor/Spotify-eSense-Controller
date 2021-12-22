@@ -95,14 +95,24 @@ class EsenseGestureClassifier {
 
 
     classifyNod();
+    classifyRotateRight();
   }
 
   void classifyNod() {
-    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.z.abs() > movingGyroStdDeviation.z*2) {
-
+    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.z.abs() > movingGyroStdDeviation.z*3) {
       if (onGestureClassified != null){ 
-        dev.log("recognized nod");
+        dev.log("RECOGNIZED NOD");
         Gesture gesture = Gesture(timestamp: DateTime.now(), type: GestureType.nod);
+        onGestureClassified!(gesture);
+      }
+    }
+  }
+
+  void classifyRotateRight() {
+    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.x > movingGyroStdDeviation.x*2) {
+      if (onGestureClassified != null){ 
+        dev.log("RECOGNIZED ROTATE RIGHT");
+        Gesture gesture = Gesture(timestamp: DateTime.now(), type: GestureType.rorateRight);
         onGestureClassified!(gesture);
       }
     }

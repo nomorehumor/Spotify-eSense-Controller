@@ -55,11 +55,20 @@ class _MyAppState extends State<MyApp> {
 
   void handleGesture(Gesture gesture) {
     setState(() {
-      if (gesture.type == GestureType.nod) {
-        _info = "nod";
-        Timer(Duration(seconds: 1), () {
-          if (_info != "no info") _info = "no info";
-        });
+      switch(gesture.type) {
+        case GestureType.nod:
+          _info = "nod";
+          Timer(Duration(seconds: 1), () {
+            if (_info != "no info") _info = "no info";
+          });
+          break;
+
+        case GestureType.rorateRight:
+          _info = "rotate right";
+          Timer(Duration(seconds: 1), () {
+            if (_info != "no info") _info = "no info";
+          });
+          break;
       }
     });
   }
