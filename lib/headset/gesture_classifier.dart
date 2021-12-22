@@ -1,18 +1,69 @@
+import 'dart:developer' as dev;
+import 'dart:core';
+import 'dart:math';
+
 import 'package:esense_flutter/esense.dart';
 import 'package:vector_math/vector_math.dart';
+import 'models/gesture.dart';
+import 'package:statistics/statistics.dart';
+
+extension VectorOperations on List<Vector3> {
+
+  Vector3 sum() {
+    Vector3 sum = Vector3(0,0,0);
+    forEach((element) {
+      sum += element;
+    });
+    return sum;
+  }
+
+  Vector3 mean() {
+    Vector3 vectorSum = sum();
+    return Vector3(vectorSum.x / length.toDouble(),
+                    vectorSum.y / length.toDouble(),
+                    vectorSum.z / length.toDouble());
+  }
+
+  Vector3 std() {
+    Vector3 vectorMean = mean();
+    Vector3 squaredSum = Vector3(0,0,0);
+    forEach((element) {
+      Vector3 demeaned = element - vectorMean;
+      squaredSum += Vector3(demeaned.x.square, demeaned.y.square, demeaned.z.square);
+    });
+
+    Vector3 variance = squaredSum / length.toDouble();
+    return Vector3(variance.x.squareRoot, variance.y.squareRoot, variance.z.squareRoot);
+  }
+}
 
 class EsenseGestureClassifier {
   EsenseGestureClassifier({
     required this.maxHistoryLength,
+    this.onGestureClassified
   });
 
-  Function? onNodClassified;
+  Function? onGestureClassified;
 
   final maxHistoryLength;
   List<Vector3> accelerometerHistory = [];
   List<Vector3> gyroscopeHistory = [];
+  Vector3 movingAccelMean = Vector3(0,0,0);
+  Vector3 movingGyroMean = Vector3(0,0,0);
+  Vector3 movingAccelStdDeviation = Vector3(0,0,0);
+  Vector3 movingGyroStdDeviation = Vector3(0,0,0);
 
   void handleEvent(SensorEvent event) {
+
+    // Check history length
+    if (accelerometerHistory.length == maxHistoryLength) {
+      accelerometerHistory.removeFromBegin(1);
+    }
+    if (gyroscopeHistory.length == maxHistoryLength) {
+      gyroscopeHistory.removeFromBegin(1);
+    }
+
+    // Add values to the history
     if (event.accel != null) {
       Vector3 vector = Vector3(
         event.accel![0].toDouble(),
@@ -28,16 +79,32 @@ class EsenseGestureClassifier {
         event.gyro![1].toDouble(),
         event.gyro![2].toDouble(),
       );
-      accelerometerHistory.add(vector);
+      gyroscopeHistory.add(vector);
     }
+
+    // Calculate stats
+    movingAccelMean = accelerometerHistory.mean();
+    movingGyroMean = gyroscopeHistory.mean();
+    movingAccelStdDeviation = accelerometerHistory.std();
+    movingGyroStdDeviation = gyroscopeHistory.std();
+
+    dev.log("Accel mean: $movingAccelMean,"
+            "Gyro mean: $movingGyroMean, "
+            "Accel std: $movingAccelStdDeviation,"
+            "Gyro std: $movingGyroStdDeviation");
+
 
     classifyNod();
   }
 
   void classifyNod() {
-    bool classified = false;
-    if (accelerometerHistory.last.x >= 15000) {
-      if (onNodClassified != null) onNodClassified!();
+    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.z.abs() > movingGyroStdDeviation.z*2) {
+
+      if (onGestureClassified != null){ 
+        dev.log("recognized nod");
+        Gesture gesture = Gesture(timestamp: DateTime.now(), type: GestureType.nod);
+        onGestureClassified!(gesture);
+      }
     }
   }
 }
