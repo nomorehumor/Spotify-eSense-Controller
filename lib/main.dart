@@ -1,13 +1,26 @@
 import 'dart:async';
 
+import 'package:audio_service/audio_service.dart';
 import 'package:esense_application/headset/charts_widget.dart';
 import 'package:esense_application/headset/gesture_classifier.dart';
 import 'package:esense_application/headset/models/gesture.dart';
 import 'package:esense_flutter/esense.dart';
 import 'package:flutter/material.dart';
 import 'headset/esense_handler.dart';
+import 'player.dart';
 
-void main() => runApp(MyApp());
+late AudioHandler _audioHandler;
+
+void main() async {
+  _audioHandler = await AudioService.init(
+    builder: () => AppAudioHandler(),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.mycompany.myapp.channel.audio',
+      androidNotificationChannelName: 'Music playback',
+    ),
+  );
+  runApp(new MyApp());
+}
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -73,6 +86,12 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  IconButton _button(IconData iconData, VoidCallback onPressed) => IconButton(
+        icon: Icon(iconData),
+        iconSize: 64.0,
+        onPressed: onPressed,
+      );
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -100,6 +119,26 @@ class _MyAppState extends State<MyApp> {
             Text(_event),
             Text("Connected: $_connected"),
             Text(_info),
+            StreamBuilder<bool>(
+              stream: _audioHandler.playbackState
+                  .map((state) => state.playing)
+                  .distinct(),
+              builder: (context, snapshot) {
+                final playing = snapshot.data ?? false;
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _button(Icons.fast_rewind, _audioHandler.rewind),
+                    if (playing)
+                      _button(Icons.pause, _audioHandler.pause)
+                    else
+                      _button(Icons.play_arrow, _audioHandler.play),
+                    _button(Icons.stop, _audioHandler.stop),
+                    _button(Icons.fast_forward, _audioHandler.fastForward),
+                  ],
+                );
+              },
+            ),
         ]),
       ),
     ));
