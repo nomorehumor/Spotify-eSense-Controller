@@ -15,6 +15,10 @@ class ToDoList extends ChangeNotifier {
     return todoList.where((todo) => todo.id == id).first;
   }
 
+  ToDo getToDoWithIndex(int index) {
+    return todoList[index];
+  }
+
   List<ToDo> getToDoList() {
     return todoList;
   }

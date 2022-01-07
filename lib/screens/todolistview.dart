@@ -6,6 +6,7 @@ import 'models/todo.dart';
 import 'widgets/todo_textfield.dart';
 import 'widgets/todo_listtile.dart';
 import 'dart:io';
+import 'dart:developer' as dev;
 
 class TodoListView extends StatefulWidget {
   TodoListView({ Key? key, this.processText}) : super(key: key);
@@ -55,13 +56,9 @@ class _TodoListViewState extends State<TodoListView> {
     Provider.of<CurrentToDoList>(context, listen: false).add(unchecked);
   }
 
-  // void onStartPlay() {
-  //   if (_currentTodos.isEmpty) return;
-  //   _playingIndex = 0;   
-  //   _playingTodos = true;
-    
-  //   playTodos(_playingIndex)
-  // }
+  void onStartPlay() {    
+    playTodos();
+  }
 
   // bool playNextTodo() {
   //   _playingIndex += 1;
@@ -75,25 +72,23 @@ class _TodoListViewState extends State<TodoListView> {
   //   return true;
   // }
 
-  // void playTodos(int index) {
-  //   print("playing todo with index $index");
-  //   highlightTodo(index);
-  //   widget.processText!(_currentTodos[index].name);
-  // }
+  void playTodos() async {
+    ToDoList todoList = Provider.of<CurrentToDoList>(context, listen: false);
+    for (int i = 0; i < todoList.count(); i++) {
+      ToDo todo = todoList.getToDoWithIndex(i);
+      dev.log("Playing todo with index $i");
+      highlightTodo(todo);
+      await widget.processText!(todo.name);
+    }
+  }
 
-  // void highlightTodo(int index) {
-  //   print("highlight $index");
-
-  //   setState(() {
-  //     for (int i = 0; i < _currentTodos.length; i++) {
-  //       if (i != index) {
-  //         _currentTodos[i].inFocus = false;
-  //       } else {
-  //         _currentTodos[i].inFocus = true;
-  //       }
-  //     }
-  //   });
-  // }
+  void highlightTodo(ToDo todo) {
+    ToDoList todoList = Provider.of<CurrentToDoList>(context, listen: false);
+    for (int i = 0; i < todoList.count(); i++) {
+      todoList.getToDoWithIndex(i).inFocus = false;
+    }
+    todo.inFocus = true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,17 +106,17 @@ class _TodoListViewState extends State<TodoListView> {
             ]
             // overlayColor: MaterialStateProperty<Color>,
           ),
-          // actions: [
-          //   Padding(
-          //     padding: const EdgeInsets.only(right: 20.0),
-          //     child: GestureDetector(
-          //       onTap: onStartPlay,
-          //       child: const Icon(
-          //         Icons.play_arrow
-          //       ),
-          //     ),
-          //   )
-          // ],
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: GestureDetector(
+                onTap: onStartPlay,
+                child: const Icon(
+                  Icons.play_arrow
+                ),
+              ),
+            )
+          ],
         ),
         body: TabBarView(
           children: [

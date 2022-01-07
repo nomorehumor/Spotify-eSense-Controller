@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
-  runApp(new MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -25,13 +25,15 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // tts = TodoTts(continueTodoPlayack);
+    tts = TodoTts();
     listView = TodoListView(processText: speakText);
   }
 
   void speakText(String text) async {
-    // tts.setVoiceText(text);
-    // await tts.speak();
+    await tts.awaitCompletion();
+    print("Processing $text");
+    tts.setVoiceText(text);
+    await tts.speak();
   }
 
   // void continueTodoPlayack() {

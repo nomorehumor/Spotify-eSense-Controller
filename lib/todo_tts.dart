@@ -1,6 +1,8 @@
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' show Platform;
+import 'dart:developer' as dev;
+
 
 enum TtsState { playing, stopped, paused, continued }
 
@@ -16,19 +18,19 @@ class TodoTts {
 
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
-  TodoTts(Function completionHandler) {
-    flutterTts = FlutterTts();    
+  TodoTts() {
+    flutterTts = FlutterTts();
     flutterTts.setLanguage('en');
+
+    flutterTts.setVolume(volume);
+    flutterTts.setSpeechRate(rate);
+    flutterTts.setPitch(pitch);
 
     _setAwaitOptions();
 
     if (isAndroid) {
       _getDefaultEngine();
     }
-
-    flutterTts.setCompletionHandler(() {
-      completionHandler();
-    });
   }
 
   void setVoiceText(String text) {
@@ -36,10 +38,6 @@ class TodoTts {
   }
 
   Future speak() async {
-    await flutterTts.setVolume(volume);
-    await flutterTts.setSpeechRate(rate);
-    await flutterTts.setPitch(pitch);
-
     if (_newVoiceText != null) {
       if (_newVoiceText!.isNotEmpty) {
         await flutterTts.speak(_newVoiceText!);
@@ -47,7 +45,16 @@ class TodoTts {
     }
   }
 
-  Future stop() async{
+  void onComplete() {
+    dev.log("completed");
+  }
+
+  Future awaitCompletion() async {
+    flutterTts.setCompletionHandler(onComplete);
+    await flutterTts.awaitSpeakCompletion(true);
+  }
+
+  Future stop() async {
     await flutterTts.stop();
   }
 
@@ -62,7 +69,7 @@ class TodoTts {
   Future _getDefaultEngine() async {
     var engine = await flutterTts.getDefaultEngine;
     if (engine != null) {
-      print(engine);
+      dev.log(engine);
     }
   }
 }
