@@ -1,21 +1,24 @@
-import 'package:esense_application/screens/models/todolist.dart';
+import 'package:esense_todos/views/todos/models/todolist.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'models/todo.dart';
+import 'models/todolist.dart';
 import 'widgets/todo_textfield.dart';
 import 'widgets/todo_listtile.dart';
-import 'dart:io';
 import 'dart:developer' as dev;
 
 class TodoListView extends StatefulWidget {
-  TodoListView({ Key? key, this.processText}) : super(key: key);
+  const TodoListView({ Key? key, this.processText, this.todoActionDetector}) : super(key: key);
 
   final Function(String)? processText;
+  final Function? todoActionDetector;
 
   @override
   _TodoListViewState createState() => _TodoListViewState();
 }
+
+enum ToDoAction {done, notDone}
 
 class _TodoListViewState extends State<TodoListView> {
   // final List<ToDo> _currentTodos = [ToDo(name: "first", isDone: false, id: 0)];
@@ -60,34 +63,28 @@ class _TodoListViewState extends State<TodoListView> {
     playTodos();
   }
 
-  // bool playNextTodo() {
-  //   _playingIndex += 1;
-
-  //   if (_playingIndex == _currentTodos.length) {
-  //     _playingTodos = false;
-  //     return false;
-  //   }
-    
-  //   playTodo(_playingIndex);
-  //   return true;
-  // }
-
   void playTodos() async {
     ToDoList todoList = Provider.of<CurrentToDoList>(context, listen: false);
     for (int i = 0; i < todoList.count(); i++) {
       ToDo todo = todoList.getToDoWithIndex(i);
       dev.log("Playing todo with index $i");
-      highlightTodo(todo);
+      
+      todoList.highlightTodo(i);
       await widget.processText!(todo.name);
+      ToDoAction action = widget.todoActionDetector!();
+      
+      if (action == ToDoAction.done) {
+        _onCheck(true, todo.id);
+        i -= 1;
+      } else if (action == ToDoAction.notDone) {
+
+      }
     }
+    todoList.removeHighlight();
   }
 
   void highlightTodo(ToDo todo) {
-    ToDoList todoList = Provider.of<CurrentToDoList>(context, listen: false);
-    for (int i = 0; i < todoList.count(); i++) {
-      todoList.getToDoWithIndex(i).inFocus = false;
-    }
-    todo.inFocus = true;
+    
   }
 
   @override

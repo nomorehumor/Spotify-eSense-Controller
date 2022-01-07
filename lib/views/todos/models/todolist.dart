@@ -1,9 +1,10 @@
-import 'package:esense_application/screens/models/todo.dart';
+import 'todo.dart';
 import 'package:flutter/material.dart';
 
 class ToDoList extends ChangeNotifier {
   List<ToDo> todoList = [];
   String name;
+  int highlighted = -1;
 
   ToDoList({required this.name});
 
@@ -38,7 +39,31 @@ class ToDoList extends ChangeNotifier {
   }
 
   void checkDone(int id, bool done) {
-    todoList.where((element) => element.id == id).first.isDone = done;
+    getToDoWithId(id).isDone = done;
+    notifyListeners();
+  }
+
+  // void setFocus(int id, bool inFocus) {
+  //   getToDoWithId(id).inFocus = inFocus;
+  // }
+
+  void highlightTodo(int index) {
+    for (int i = 0; i < count(); i++) {
+      if (i != index) {
+        todoList[i].inFocus = false;
+      } else {
+        todoList[i].inFocus = true;
+      }
+    }
+    highlighted = index;
+    notifyListeners();
+  }
+
+  void removeHighlight() {
+    for (int i = 0; i < count(); i++) {
+      todoList[i].inFocus = true;
+    }
+    highlighted = -1;
     notifyListeners();
   }
 }

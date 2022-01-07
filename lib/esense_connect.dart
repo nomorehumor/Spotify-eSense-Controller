@@ -55,7 +55,7 @@ class _EsenseConnectionWidgetState extends State<EsenseConnectionWidget> {
 
   void handleGesture(Gesture gesture) {
     setState(() {
-      switch(gesture.type) {
+      switch (gesture.type) {
         case GestureType.nod:
           _info = "nod";
           Timer(Duration(seconds: 1), () {

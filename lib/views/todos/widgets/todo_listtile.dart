@@ -17,8 +17,8 @@ class _ToDoListTileState extends State<ToDoListTile> {
   @override
   Widget build(BuildContext context) {
     return Opacity(
-      // opacity: widget.todo.inFocus ? 1.0 : 0.5,
-      opacity: 1,
+      opacity: widget.todo.inFocus ? 1.0 : 0.5,
+      // opacity: 1,
       child: Card(
         color: widget.todo.isDone ? Colors.grey.shade400 : Colors.white,
         child: CheckboxListTile(

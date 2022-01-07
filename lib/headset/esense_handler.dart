@@ -3,8 +3,10 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 class EsenseHandler {
-  EsenseHandler(
-      {required this.esenseName, this.onEvent, this.onConnectedChange});
+
+  EsenseHandler._privateConstructor();
+  static final EsenseHandler _instance = EsenseHandler._privateConstructor();
+  static EsenseHandler get instance => _instance;
 
   Function(SensorEvent)? onEvent;
   Function(bool)? onConnectedChange;
@@ -13,6 +15,14 @@ class EsenseHandler {
   bool _connected = false;
 
   StreamSubscription? subscription;
+
+  set setEsenseName(String esenseName) {
+    this.esenseName = esenseName;
+  }
+
+  set setEventHandler(Function(SensorEvent)? onEvent) {
+    this.onEvent = onEvent;
+  }
 
   Future connectToESense() async {
     developer.log('connecting... connected: $_connected');
@@ -30,7 +40,6 @@ class EsenseHandler {
 
       // when we're connected to the eSense device, we can start listening to events from it
       if (event.type == ConnectionType.connected) {
-        _listenToSensorEvents();
         _connected = true;
         onConnectedChange!(_connected);
       } else {
@@ -39,9 +48,17 @@ class EsenseHandler {
     });
   }
 
-  void _listenToSensorEvents() async {
-    ESenseManager().sensorEvents.listen((event) {
-      developer.log('ESENSE event: $event');
+  // void _listenToSensorEvents() async {
+  //   ESenseManager().sensorEvents.listen((event) {
+  //     developer.log('ESENSE event: $event');
+  //     onEvent!(event);
+  //   });
+  // }
+
+  void startListenToSensorEvents() async {
+    // subscribe to sensor event from the eSense device
+    subscription = ESenseManager().sensorEvents.listen((event) {
+      print('SENSOR event: $event');
       onEvent!(event);
     });
   }

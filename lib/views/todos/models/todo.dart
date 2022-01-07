@@ -6,18 +6,17 @@ class ToDo {
   int id;
   bool inFocus = true;
 
-
-  get getIsDone => isDone;
-
-  set setIsDone( isDone) {
+  set setIsDone(bool isDone) {
     this.isDone = isDone;
   }  
 
-  get getInFocus => inFocus;
-
-  set setInFocus( inFocus) {
+  set setInFocus(bool inFocus) {
     this.inFocus = inFocus;
   }
+
+  get getName => name;
+  get getInFocus => inFocus;
+  get getIsDone => isDone;
 
   ToDo({required this.name, required this.isDone, required this.id});
 }
