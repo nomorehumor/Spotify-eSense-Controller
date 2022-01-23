@@ -4,21 +4,21 @@ import 'dart:io' show Platform;
 import 'dart:developer' as dev;
 
 
-enum TtsState { playing, stopped, paused, continued }
+enum TextSpeakerState { playing, stopped, paused, continued }
 
-class TodoTts {
+class TextSpeaker {
   late FlutterTts flutterTts;
-  TtsState ttsState = TtsState.stopped;
+  TextSpeakerState state = TextSpeakerState.stopped;
   String? _newVoiceText = "hello";
 
   double volume = 0.5;
   double pitch = 1.0;
   double rate = 0.5;
-  get isPlaying => ttsState == TtsState.playing;
+  get isPlaying => state == TextSpeakerState.playing;
 
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
 
-  TodoTts() {
+  TextSpeaker() {
     flutterTts = FlutterTts();
     flutterTts.setLanguage('en');
 

@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:esense_flutter/esense.dart';
 import 'package:flutter/material.dart';
 
-import 'headset/esense_handler.dart';
-import 'headset/gesture_classifier.dart';
+import 'headset/controllers/esense_handler.dart';
+import 'headset/controllers/gesture_classifier.dart';
 import 'headset/models/gesture.dart';
 
+@deprecated
 class EsenseConnectionWidget extends StatefulWidget {
   const EsenseConnectionWidget({ Key? key }) : super(key: key);
 
@@ -14,16 +15,14 @@ class EsenseConnectionWidget extends StatefulWidget {
   _EsenseConnectionWidgetState createState() => _EsenseConnectionWidgetState();
 }
 
+@deprecated
 class _EsenseConnectionWidgetState extends State<EsenseConnectionWidget> {
 
   bool _connected = false;
   String _event = "No events yet";
   String _info = "no info";
 
-  late EsenseHandler handler = EsenseHandler(
-      esenseName: 'eSense-0099',
-      onEvent: handleEvent,
-      onConnectedChange: onConnectedChange);
+  
   late EsenseGestureClassifier gestureClassifier = EsenseGestureClassifier(
       maxHistoryLength: 200, onGestureClassified: handleGesture);
 
@@ -31,12 +30,12 @@ class _EsenseConnectionWidgetState extends State<EsenseConnectionWidget> {
   @override
   void initState() {
     super.initState();
-    handler.startListenToESense();
+    EsenseController.instance.startListenToESense();
   }
 
   @override
   void dispose() {
-    handler.close();
+    EsenseController.instance.close();
     super.dispose();
   }
 
@@ -81,10 +80,9 @@ class _EsenseConnectionWidgetState extends State<EsenseConnectionWidget> {
       children: [
         Container(
           height: 80,
-          // width: 200,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
           child: TextButton.icon(
-            onPressed: handler.connectToESense,
+            onPressed: EsenseController.instance.connectToESense,
             icon: const Icon(Icons.login),
             label: const Text(
               'CONNECT',

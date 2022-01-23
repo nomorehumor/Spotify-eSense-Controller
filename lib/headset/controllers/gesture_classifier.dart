@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:esense_flutter/esense.dart';
 import 'package:vector_math/vector_math.dart';
-import 'models/gesture.dart';
+import '../models/gesture.dart';
 import 'package:statistics/statistics.dart';
 
 extension VectorOperations on List<Vector3> {

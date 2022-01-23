@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/todo.dart';
+import '../../models/todo.dart';
 
 class ToDoListTile extends StatefulWidget {
   const ToDoListTile({Key? key, required this.todo, required this.onCheck}) : super(key: key);
