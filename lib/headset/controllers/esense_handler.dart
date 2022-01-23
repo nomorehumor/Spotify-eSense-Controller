@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 
 class EsenseController {
 
+  // Singleton class
   EsenseController._privateConstructor();
   static final EsenseController _instance = EsenseController._privateConstructor();
   static EsenseController get instance => _instance;
@@ -17,12 +18,16 @@ class EsenseController {
     _esenseName = esenseName;
   }
 
-  void setEventHandler(Function(SensorEvent)? onEvent) {
-    ESenseManager().sensorEvents.listen(onEvent);
+  bool isConnected() {
+    return _connected;
   }
 
-  void setConnectionHandler(Function(ConnectionEvent)? onConnection) {
-    ESenseManager().connectionEvents.listen(onConnection);
+  StreamSubscription setEventHandler(Function(SensorEvent)? onEvent) {
+    return ESenseManager().sensorEvents.listen(onEvent);
+  }
+
+  StreamSubscription setConnectionHandler(Function(ConnectionEvent)? onConnection) {
+    return ESenseManager().connectionEvents.listen(onConnection);
   } 
 
   Future connectToESense() async {
@@ -41,7 +46,6 @@ class EsenseController {
       // when we're connected to the eSense device, we can start listening to events from it
       if (event.type == ConnectionType.connected) {
         _connected = true;
-        // onConnectedChange!(_connected);
       } else {
         _connected = false;
       }

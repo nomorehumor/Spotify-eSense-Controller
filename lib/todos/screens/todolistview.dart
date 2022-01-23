@@ -1,4 +1,5 @@
-import 'package:esense_todos/headset/screens/headset_settings.dart';
+import 'package:esense_todos/settings/screens/widgets/headset_settings.dart';
+import 'package:esense_todos/settings/screens/settings.dart';
 import 'package:esense_todos/utils/text_speaker.dart';
 import 'package:esense_todos/todos/models/todolist.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +20,6 @@ class TodoListView extends StatefulWidget {
   _TodoListViewState createState() => _TodoListViewState();
 }
 
-enum ToDoAction {done, notDone}
-
 class _TodoListViewState extends State<TodoListView> {
 
   // bool _playingTodos = false;
@@ -40,7 +39,7 @@ class _TodoListViewState extends State<TodoListView> {
   }
 
   void _onSettingsCalled() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const HeadsetSettings()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const Settings()));
   }
 
   void _addCurrentToDo(ToDo newToDo) {
@@ -67,11 +66,11 @@ class _TodoListViewState extends State<TodoListView> {
   }
 
 
-  void _onStartPlay() {    
-    _playTodos();
+  void _onStartPlay() async{    
+    await _playTodos();
   }
 
-  void _playTodos() async {                 
+  Future _playTodos() async {                 
     ToDoList todoList = Provider.of<CurrentToDoList>(context, listen: false);
     
     for (int i = 0; i < todoList.count(); i++) {
@@ -80,14 +79,13 @@ class _TodoListViewState extends State<TodoListView> {
       
       todoList.highlightTodo(i);
       await speakText(todo.name);
-      ToDoAction action = await toDoGestureHandler.waitForActions(3000);
-      
+      ToDoAction action = await toDoGestureHandler.waitForActions(1500);
+      print("action: $action");
+
       if (action == ToDoAction.done) {
         _onCheck(true, todo.id);
         i -= 1;
-      } else if (action == ToDoAction.notDone) {
-
-      }
+      } 
     }
     todoList.removeHighlight();
   }

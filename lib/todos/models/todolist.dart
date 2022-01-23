@@ -70,12 +70,20 @@ class ToDoList extends ChangeNotifier {
 
 class CurrentToDoList extends ToDoList {
   CurrentToDoList() : super(name: "Current") {
-    todoList = [ToDo(name: "init current", isDone: false, id: 0)];
+    // TODO: Remove default values in production
+    todoList = [
+      ToDo(name: "Buy Bread", isDone: false, id: 0),
+      ToDo(name: "Buy Beer", isDone: false, id: 3)
+    ];
   }
 }
 
 class DoneToDoList extends ToDoList {
   DoneToDoList() : super(name: "Done") {
-    todoList = [ToDo(name: "init done", isDone: true, id: 0)];
+    // TODO: Remove default values in production
+    todoList = [
+      ToDo(name: "Create flutter app", isDone: true, id: 1), 
+      ToDo(name: "Return Earables to TECO", isDone: true, id: 2)
+    ];
   }
 }

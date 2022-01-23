@@ -3,6 +3,7 @@ import 'dart:core';
 import 'dart:math';
 
 import 'package:esense_flutter/esense.dart';
+import 'package:esense_todos/headset/controllers/esense_handler.dart';
 import 'package:vector_math/vector_math.dart';
 import '../models/gesture.dart';
 import 'package:statistics/statistics.dart';
@@ -45,13 +46,14 @@ class EsenseGestureClassifier {
 
   Function? onGestureClassified;
 
-  final maxHistoryLength;
+  final int maxHistoryLength;
   List<Vector3> accelerometerHistory = [];
   List<Vector3> gyroscopeHistory = [];
   Vector3 movingAccelMean = Vector3(0,0,0);
   Vector3 movingGyroMean = Vector3(0,0,0);
   Vector3 movingAccelStdDeviation = Vector3(0,0,0);
   Vector3 movingGyroStdDeviation = Vector3(0,0,0);
+
 
   void handleEvent(SensorEvent event) {
 
@@ -94,12 +96,13 @@ class EsenseGestureClassifier {
             "Gyro std: $movingGyroStdDeviation");
 
 
-    classifyNod();
-    classifyRotateRight();
+    _classifyNod();
+    _classifyRotateRight();
   }
 
-  void classifyNod() {
-    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.z.abs() > movingGyroStdDeviation.z*3) {
+  void _classifyNod() {
+    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.z.abs() > movingGyroStdDeviation.z*1.5
+        && gyroscopeHistory.last.x.abs() < movingGyroStdDeviation.x * 1.3) {
       if (onGestureClassified != null){ 
         dev.log("RECOGNIZED NOD");
         Gesture gesture = Gesture(timestamp: DateTime.now(), type: GestureType.nod);
@@ -108,7 +111,7 @@ class EsenseGestureClassifier {
     }
   }
 
-  void classifyRotateRight() {
+  void _classifyRotateRight() {
     if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.x > movingGyroStdDeviation.x*2) {
       if (onGestureClassified != null){ 
         dev.log("RECOGNIZED ROTATE RIGHT");

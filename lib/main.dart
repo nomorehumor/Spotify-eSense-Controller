@@ -1,9 +1,5 @@
-import 'package:esense_todos/headset/controllers/esense_handler.dart';
-import 'package:esense_todos/headset/controllers/gesture_classifier.dart';
-import 'package:esense_todos/todos/controllers/todo_gestures_handler.dart';
 import 'todos/models/todolist.dart';
 import 'todos/screens/todolistview.dart';
-import 'text_to_speech/text_speaker.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
@@ -29,10 +25,6 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     listView = const TodoListView();
   }
-
-  // Future<ToDoAction> recognizeActionFromGesture() async {
-  //   // return await toDoGestureHandler.waitForActions(2000);
-  // }
 
   @override
   Widget build(BuildContext context) {

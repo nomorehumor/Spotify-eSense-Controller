@@ -46,7 +46,7 @@ class TextSpeaker {
   }
 
   void onComplete() {
-    dev.log("completed");
+    dev.log("completed utterance");
   }
 
   Future awaitCompletion() async {
