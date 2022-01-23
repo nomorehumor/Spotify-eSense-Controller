@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+
 import 'todos/models/todolist.dart';
 import 'todos/screens/todolistview.dart';
-import 'package:flutter/foundation.dart';
-
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -18,28 +19,22 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
+  final getIt = GetIt.instance;
   late TodoListView listView;
 
   @override
   void initState() {
     super.initState();
     listView = const TodoListView();
+
+    getIt.registerSingleton<CurrentToDoList>(CurrentToDoList(), signalsReady: true);
+    getIt.registerSingleton<DoneToDoList>(DoneToDoList(), signalsReady: true);
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (_) => CurrentToDoList(),
-            ),
-            ChangeNotifierProvider(
-              create: (_) => DoneToDoList(),
-            )
-          ],
-          child: listView
-        )
+        home: listView
       );
   }
 

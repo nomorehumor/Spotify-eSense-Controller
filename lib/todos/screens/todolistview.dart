@@ -3,6 +3,8 @@ import 'package:esense_todos/settings/screens/settings.dart';
 import 'package:esense_todos/utils/text_speaker.dart';
 import 'package:esense_todos/todos/models/todolist.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 
 import '../controllers/todo_gestures_handler.dart';
@@ -22,12 +24,20 @@ class TodoListView extends StatefulWidget {
 
 class _TodoListViewState extends State<TodoListView> {
 
-  // bool _playingTodos = false;
-  // int _playingIndex = -1;
-
+  final getIt = GetIt.instance;
   TextSpeaker textSpeaker = TextSpeaker();
   ToDoGestureHandler toDoGestureHandler = ToDoGestureHandler();
 
+  @override
+  void initState() {
+    getIt
+        .isReady<CurrentToDoList>()
+        .then((_) => getIt<CurrentToDoList>().addListener(update));
+
+    getIt
+        .isReady<DoneToDoList>()
+        .then((_) => getIt<DoneToDoList>().addListener(update));
+  }
 
   void _showTextField(BuildContext context) {
     showModalBottomSheet(
@@ -44,34 +54,35 @@ class _TodoListViewState extends State<TodoListView> {
 
   void _addCurrentToDo(ToDo newToDo) {
     if (newToDo.name.isEmpty) return;
-    Provider.of<CurrentToDoList>(context, listen: false).add(newToDo);
+    getIt<CurrentToDoList>().add(newToDo);
   }
 
   void _onCheck(bool check, int id) {
-    CurrentToDoList currentToDoList = Provider.of<CurrentToDoList>(context, listen: false);
+    CurrentToDoList currentToDoList = getIt<CurrentToDoList>();
     currentToDoList.checkDone(id, true);
 
     ToDo checked = currentToDoList.getToDoWithId(id);
     currentToDoList.remove(checked);
-    Provider.of<DoneToDoList>(context, listen: false).add(checked);
+    getIt<DoneToDoList>().add(checked);
   }
 
   void _onUncheck(bool check, int id) {
-    DoneToDoList doneToDoList = Provider.of<DoneToDoList>(context, listen: false);
+    DoneToDoList doneToDoList = getIt<DoneToDoList>();
     doneToDoList.checkDone(id, false);
 
     ToDo unchecked = doneToDoList.getToDoWithId(id);
     doneToDoList.remove(unchecked);
-    Provider.of<CurrentToDoList>(context, listen: false).add(unchecked);
+    getIt<CurrentToDoList>().add(unchecked);
   }
 
+  void update() => setState(() => {});
 
   void _onStartPlay() async{    
     await _playTodos();
   }
 
   Future _playTodos() async {                 
-    ToDoList todoList = Provider.of<CurrentToDoList>(context, listen: false);
+    ToDoList todoList = getIt.get<CurrentToDoList>();
     
     for (int i = 0; i < todoList.count(); i++) {
       ToDo todo = todoList.getToDoWithIndex(i);
@@ -99,6 +110,9 @@ class _TodoListViewState extends State<TodoListView> {
 
   @override
   Widget build(BuildContext context) {
+    final currentTodos = getIt<CurrentToDoList>();
+    final doneTodos = getIt<DoneToDoList>();
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -136,33 +150,28 @@ class _TodoListViewState extends State<TodoListView> {
         ),
         body: TabBarView(
           children: [
-            Consumer<CurrentToDoList>(
-              builder: (context, list, child) {
-                return ListView.builder(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: list.count(),
-                  itemBuilder: (BuildContext context, int index) {
-                    return ToDoListTile(
-                      todo: list.getToDo(index),
-                      onCheck: _onCheck,
-                    );
-                  }
-                );
-              },
+            ValueListenableBuilder(
+              valueListenable: currentTodos,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: getIt.get<CurrentToDoList>().count(),
+                itemBuilder: (BuildContext context, int index) {
+                  return ToDoListTile(
+                    todo: currentTodos.getToDo(index),
+                    onCheck: _onCheck,
+                  );
+                }
+              ),
             ),
-            Consumer<DoneToDoList>(
-              builder: (context, list, child) {
-                return ListView.builder(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: list.count(),
-                  itemBuilder: (BuildContext context, int index) {
-                    return ToDoListTile(
-                      todo: list.getToDo(index),
-                      onCheck: _onUncheck,
-                    );
-                  }
+            ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: getIt.get<DoneToDoList>().count(),
+              itemBuilder: (BuildContext context, int index) {
+                return ToDoListTile(
+                  todo: doneTodos.getToDo(index),
+                  onCheck: _onUncheck,
                 );
-              },
+              }
             ),
           ]
         ),
