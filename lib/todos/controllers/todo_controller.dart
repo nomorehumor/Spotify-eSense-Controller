@@ -6,7 +6,7 @@ import 'dart:developer' as dev;
 
 class TodoController {
 
-  TextSpeaker _tts = TextSpeaker();
+  final TextSpeaker _tts = TextSpeaker();
   ToDoGestureHandler toDoGestureHandler = ToDoGestureHandler();
 
   late CurrentToDoList currentToDoList;
@@ -15,10 +15,10 @@ class TodoController {
   TodoController(this.currentToDoList, this.doneToDoList);
 
   Future speakText(String text) async {
-    await _tts!.awaitCompletion();
+    await _tts.awaitCompletion();
     dev.log("Processing $text");
-    _tts!.setVoiceText(text);
-    await _tts!.speak();
+    _tts.setVoiceText("a " + text);
+    await _tts.speak();
   }
 
   void addToDo(ToDo newToDo) {

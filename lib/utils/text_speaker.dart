@@ -11,9 +11,9 @@ class TextSpeaker {
   TextSpeakerState state = TextSpeakerState.stopped;
   String? _newVoiceText = "hello";
 
-  double volume = 0.5;
+  double volume = 0.7;
   double pitch = 1.0;
-  double rate = 0.5;
+  double rate = 0.2;
   get isPlaying => state == TextSpeakerState.playing;
 
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
