@@ -33,7 +33,7 @@ dependencies:
 
   esense_flutter:
   statistics:
-  fl_chart: ^0.40.2
+  # fl_chart: ^0.40.2
   sensors_plus: 
   
   flutter_tts:
@@ -59,7 +59,7 @@ dev_dependencies:
 # The following section is specific to Flutter.
 flutter:
   assets:
-    - assets/compass.jpg
+    - assets/success_sound.wav
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -39,7 +39,8 @@ class _MyAppState extends State<MyApp> {
             )
           ],
           child: listView
-        )
+        ),
+        debugShowCheckedModeBanner: false,
       );
   }
 

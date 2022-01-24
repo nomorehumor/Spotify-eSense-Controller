@@ -24,6 +24,7 @@ class _HeadsetSettingsState extends State<HeadsetSettings> {
       })
     });
 
+    super.initState();
   }
 
   void connect() {

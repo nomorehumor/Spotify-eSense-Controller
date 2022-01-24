@@ -101,7 +101,7 @@ class EsenseGestureClassifier {
   }
 
   void _classifyNod() {
-    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.z.abs() > movingGyroStdDeviation.z*1.5
+    if (gyroscopeHistory.isNotEmpty && gyroscopeHistory.last.z.abs() > movingGyroStdDeviation.z*1.3
         && gyroscopeHistory.last.x.abs() < movingGyroStdDeviation.x * 1.3) {
       if (onGestureClassified != null){ 
         dev.log("RECOGNIZED NOD");

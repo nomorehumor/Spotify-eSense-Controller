@@ -1,5 +1,6 @@
 import 'package:esense_todos/settings/screens/widgets/headset_settings.dart';
 import 'package:esense_todos/settings/screens/settings.dart';
+import 'package:esense_todos/todos/controllers/todo_controller.dart';
 import 'package:esense_todos/utils/text_speaker.dart';
 import 'package:esense_todos/todos/models/todolist.dart';
 import 'package:flutter/material.dart';
@@ -22,79 +23,30 @@ class TodoListView extends StatefulWidget {
 
 class _TodoListViewState extends State<TodoListView> {
 
-  // bool _playingTodos = false;
-  // int _playingIndex = -1;
-
   TextSpeaker textSpeaker = TextSpeaker();
-  ToDoGestureHandler toDoGestureHandler = ToDoGestureHandler();
 
+  late TodoController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TodoController(
+      Provider.of<CurrentToDoList>(context, listen: false), 
+      Provider.of<DoneToDoList>(context, listen: false)
+    );
+  }
 
   void _showTextField(BuildContext context) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return ToDoTextField(onFinish: _addCurrentToDo);
+        return ToDoTextField(onFinish: controller.addToDo);
       },
     );
   }
 
   void _onSettingsCalled() {
     Navigator.push(context, MaterialPageRoute(builder: (context) => const Settings()));
-  }
-
-  void _addCurrentToDo(ToDo newToDo) {
-    if (newToDo.name.isEmpty) return;
-    Provider.of<CurrentToDoList>(context, listen: false).add(newToDo);
-  }
-
-  void _onCheck(bool check, int id) {
-    CurrentToDoList currentToDoList = Provider.of<CurrentToDoList>(context, listen: false);
-    currentToDoList.checkDone(id, true);
-
-    ToDo checked = currentToDoList.getToDoWithId(id);
-    currentToDoList.remove(checked);
-    Provider.of<DoneToDoList>(context, listen: false).add(checked);
-  }
-
-  void _onUncheck(bool check, int id) {
-    DoneToDoList doneToDoList = Provider.of<DoneToDoList>(context, listen: false);
-    doneToDoList.checkDone(id, false);
-
-    ToDo unchecked = doneToDoList.getToDoWithId(id);
-    doneToDoList.remove(unchecked);
-    Provider.of<CurrentToDoList>(context, listen: false).add(unchecked);
-  }
-
-
-  void _onStartPlay() async{    
-    await _playTodos();
-  }
-
-  Future _playTodos() async {                 
-    ToDoList todoList = Provider.of<CurrentToDoList>(context, listen: false);
-    
-    for (int i = 0; i < todoList.count(); i++) {
-      ToDo todo = todoList.getToDoWithIndex(i);
-      dev.log("Playing todo with index $i");
-      
-      todoList.highlightTodo(i);
-      await speakText(todo.name);
-      ToDoAction action = await toDoGestureHandler.waitForActions(1500);
-      print("action: $action");
-
-      if (action == ToDoAction.done) {
-        _onCheck(true, todo.id);
-        i -= 1;
-      } 
-    }
-    todoList.removeHighlight();
-  }
-
-  Future speakText(String text) async {
-    await textSpeaker.awaitCompletion();
-    print("Processing $text");
-    textSpeaker.setVoiceText(text);
-    await textSpeaker.speak();
   }
 
   @override
@@ -117,7 +69,7 @@ class _TodoListViewState extends State<TodoListView> {
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: GestureDetector(
-                onTap: _onStartPlay,
+                onTap: controller.playTodos,
                 child: const Icon(
                   Icons.play_arrow
                 ),
@@ -144,7 +96,7 @@ class _TodoListViewState extends State<TodoListView> {
                   itemBuilder: (BuildContext context, int index) {
                     return ToDoListTile(
                       todo: list.getToDo(index),
-                      onCheck: _onCheck,
+                      onCheck: controller.checkToDo,
                     );
                   }
                 );
@@ -158,7 +110,7 @@ class _TodoListViewState extends State<TodoListView> {
                   itemBuilder: (BuildContext context, int index) {
                     return ToDoListTile(
                       todo: list.getToDo(index),
-                      onCheck: _onUncheck,
+                      onCheck: controller.uncheckToDo,
                     );
                   }
                 );
